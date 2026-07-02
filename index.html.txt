@@ -1,0 +1,1140 @@
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINAL DRAFT (Lesson 4-8) 定期試験対策アプリ</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #f3f4f6;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* カードのフリップ（回転）アニメーション */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- ヘッダー -->
+    <header class="bg-indigo-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-graduation-cap text-2xl text-yellow-300"></i>
+                <h1 class="font-bold text-lg md:text-xl tracking-tight">FINAL DRAFT 特訓</h1>
+            </div>
+            <div class="text-xs bg-indigo-800 px-3 py-1.5 rounded-full font-medium text-indigo-200">
+                論表Ⅲ・1学期期末範囲 (L4〜L8)
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6">
+        
+        <!-- ================= ダッシュボード画面 ================= -->
+        <div id="screen-dashboard" class="space-y-6">
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white shadow-lg">
+                <h2 class="text-2xl font-bold mb-2">試験突破暗記システム 🔥</h2>
+                <p class="text-sm text-indigo-100 mb-4 leading-relaxed">
+                    「STEP 1 暗唱例文」を穴埋め・並べ替えで徹底対策！基本、教科書の例文がそのまま出題されます。全範囲を完全マスターしましょう。
+                </p>
+                <div class="flex items-center space-x-4 text-xs bg-white/10 p-3 rounded-lg">
+                    <div class="flex-1">
+                        <span class="block text-indigo-200">現在の総学習進捗度</span>
+                        <div class="w-full bg-white/20 h-2 rounded-full mt-1.5 overflow-hidden">
+                            <div id="total-progress-bar" class="bg-emerald-400 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                    </div>
+                    <span id="total-progress-percent" class="font-bold text-lg text-emerald-300">0%</span>
+                </div>
+            </div>
+
+            <!-- レッスン選択 -->
+            <div>
+                <h3 class="font-bold text-gray-800 text-lg mb-3 flex items-center">
+                    <i class="fa-solid fa-book-open text-indigo-600 mr-2"></i>対策レッスンを選ぶ
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="lesson-grid">
+                    <!-- JSで動的に追加されます -->
+                </div>
+            </div>
+
+            <!-- モード選択モーダル（レッスン選択後に表示されるエリア） -->
+            <div id="mode-selector-container" class="hidden bg-white p-6 rounded-2xl border-2 border-indigo-100 shadow-xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <h4 class="font-bold text-gray-800 text-lg" id="selected-lesson-title">Lesson X</h4>
+                    <button onclick="closeModeSelector()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500">試験対策に最も適したモードを選んで学習を開始してください。</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button onclick="startMode('card')" class="flex flex-col items-center justify-center p-4 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition duration-200 group">
+                        <div class="w-12 h-12 rounded-full bg-amber-500 text-white flex items-center justify-center text-xl mb-3 shadow-sm group-hover:scale-110 transition duration-200">
+                            <i class="fa-regular fa-clone"></i>
+                        </div>
+                        <span class="font-bold text-amber-900 text-sm">暗記カード</span>
+                        <span class="text-[10px] text-amber-700 mt-1 text-center">日↔英をすばやく脳内変換</span>
+                    </button>
+
+                    <button onclick="startMode('fill')" class="flex flex-col items-center justify-center p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition duration-200 group">
+                        <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl mb-3 shadow-sm group-hover:scale-110 transition duration-200">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </div>
+                        <span class="font-bold text-emerald-900 text-sm">穴埋めテスト (4択)</span>
+                        <span class="text-[10px] text-emerald-700 mt-1 text-center">太字の重要表現・文法を攻略</span>
+                    </button>
+
+                    <button onclick="startMode('arrange')" class="flex flex-col items-center justify-center p-4 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-xl transition duration-200 group">
+                        <div class="w-12 h-12 rounded-full bg-sky-500 text-white flex items-center justify-center text-xl mb-3 shadow-sm group-hover:scale-110 transition duration-200">
+                            <i class="fa-solid fa-arrow-down-a-z"></i>
+                        </div>
+                        <span class="font-bold text-sky-900 text-sm">並べ替えテスト</span>
+                        <span class="text-[10px] text-sky-700 mt-1 text-center">文構造・語順をそのまま対策</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= 1. 暗記カード画面 ================= -->
+        <div id="screen-card" class="hidden space-y-6">
+            <div class="flex justify-between items-center bg-white px-4 py-3 rounded-xl shadow-sm">
+                <button onclick="backToDashboard()" class="text-gray-600 hover:text-gray-800 flex items-center text-sm font-medium">
+                    <i class="fa-solid fa-chevron-left mr-1.5"></i> 戻る
+                </button>
+                <span id="card-progress-text" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">1 / 10</span>
+                <span class="text-xs font-medium text-gray-400">タップで回転</span>
+            </div>
+
+            <!-- 進捗バー -->
+            <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                <div id="card-progress-bar" class="bg-indigo-600 h-full w-0 transition-all duration-300"></div>
+            </div>
+
+            <!-- カードコンテナ -->
+            <div class="perspective-1000 h-[300px] w-full cursor-pointer" onclick="flipCard()">
+                <div id="flashcard" class="preserve-3d duration-500 relative w-full h-full">
+                    
+                    <!-- 表面 (日本語) -->
+                    <div class="backface-hidden absolute w-full h-full bg-white border-2 border-gray-200 rounded-2xl shadow-md p-6 flex flex-col justify-between">
+                        <span class="text-xs font-bold text-indigo-500 tracking-wider">日本語訳</span>
+                        <div class="flex-grow flex items-center justify-center">
+                            <p id="card-ja" class="text-lg md:text-xl font-bold text-center text-gray-800 leading-relaxed px-4"></p>
+                        </div>
+                        <div class="text-center text-xs text-gray-400">
+                            <i class="fa-solid fa-arrow-rotate-right mr-1"></i> タップして英文を表示
+                        </div>
+                    </div>
+
+                    <!-- 裏面 (英語 + Point) -->
+                    <div class="backface-hidden rotate-y-180 absolute w-full h-full bg-indigo-50 border-2 border-indigo-300 rounded-2xl shadow-md p-6 flex flex-col justify-between">
+                        <span class="text-xs font-bold text-indigo-600 tracking-wider">解答の英文</span>
+                        <div class="flex-grow flex flex-col items-center justify-center space-y-4 px-2 overflow-y-auto">
+                            <p id="card-en" class="text-lg md:text-xl font-bold text-center text-indigo-950 leading-relaxed"></p>
+                            <p id="card-point" class="text-xs text-center text-indigo-700 bg-white px-3 py-1.5 rounded-lg border border-indigo-100 w-full max-w-md shadow-sm"></p>
+                        </div>
+                        <div class="text-center text-xs text-indigo-400">
+                            <i class="fa-solid fa-arrow-rotate-right mr-1"></i> タップして日本語を表示
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- アクションボタン -->
+            <div class="flex space-x-4">
+                <button onclick="markCardMastered(false)" class="flex-1 bg-white hover:bg-rose-50 border-2 border-rose-200 text-rose-600 py-3 rounded-xl font-bold transition duration-200 flex items-center justify-center space-x-2 shadow-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span>まだ自信がない</span>
+                </button>
+                <button onclick="markCardMastered(true)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-bold transition duration-200 flex items-center justify-center space-x-2 shadow-sm">
+                    <i class="fa-solid fa-check"></i>
+                    <span>覚えた！</span>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ================= 2. 穴埋めテスト画面 ================= -->
+        <div id="screen-fill" class="hidden space-y-6">
+            <div class="flex justify-between items-center bg-white px-4 py-3 rounded-xl shadow-sm">
+                <button onclick="backToDashboard()" class="text-gray-600 hover:text-gray-800 flex items-center text-sm font-medium">
+                    <i class="fa-solid fa-chevron-left mr-1.5"></i> 戻る
+                </button>
+                <span id="fill-progress-text" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">1 / 10</span>
+                <span id="fill-score-live" class="text-xs font-bold text-gray-500">正解: 0</span>
+            </div>
+
+            <!-- 進捗バー -->
+            <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                <div id="fill-progress-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+
+            <!-- 問題表示 -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-md space-y-4">
+                <div class="text-xs font-bold text-emerald-500 uppercase tracking-wider">空欄補充問題</div>
+                <p id="fill-question-ja" class="text-sm md:text-base font-medium text-gray-600 leading-relaxed"></p>
+                <!-- 空欄あり英文 -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <p id="fill-question-en" class="text-base md:text-lg font-semibold text-slate-800 leading-relaxed tracking-wide"></p>
+                </div>
+            </div>
+
+            <!-- 選択肢グリッド -->
+            <div id="fill-options" class="grid grid-cols-1 gap-3">
+                <!-- JSで動的にボタン生成 -->
+            </div>
+
+            <!-- 正解・不正解後の解説ブロック -->
+            <div id="fill-feedback" class="hidden bg-slate-100 p-4 rounded-xl space-y-2">
+                <div class="flex items-center space-x-2 font-bold" id="fill-feedback-title">
+                    <!-- アイコンと正誤テキスト -->
+                </div>
+                <p id="fill-feedback-en" class="text-sm font-semibold text-gray-800"></p>
+                <p id="fill-feedback-point" class="text-xs text-gray-600 leading-relaxed"></p>
+                <button onclick="nextFillQuestion()" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg font-bold transition flex items-center justify-center space-x-1">
+                    <span>次へ進む</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ================= 3. 並べ替えテスト画面 ================= -->
+        <div id="screen-arrange" class="hidden space-y-6">
+            <div class="flex justify-between items-center bg-white px-4 py-3 rounded-xl shadow-sm">
+                <button onclick="backToDashboard()" class="text-gray-600 hover:text-gray-800 flex items-center text-sm font-medium">
+                    <i class="fa-solid fa-chevron-left mr-1.5"></i> 戻る
+                </button>
+                <span id="arrange-progress-text" class="text-xs font-bold text-sky-600 bg-sky-50 px-2.5 py-1 rounded-full">1 / 10</span>
+                <span id="arrange-score-live" class="text-xs font-bold text-gray-500">正解: 0</span>
+            </div>
+
+            <!-- 進捗バー -->
+            <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                <div id="arrange-progress-bar" class="bg-sky-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+
+            <!-- 問題表示 -->
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-md space-y-3">
+                <div class="text-xs font-bold text-sky-500 uppercase tracking-wider">並べ替え英作文</div>
+                <p id="arrange-question-ja" class="text-sm md:text-base font-semibold text-gray-700"></p>
+            </div>
+
+            <!-- 組み立てエリア -->
+            <div class="bg-sky-50/50 border-2 border-dashed border-sky-200 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-2 items-center content-start" id="arrange-workbench">
+                <!-- 選択したワードがここに入る -->
+            </div>
+
+            <!-- 単語プール（シャッフルされたカード） -->
+            <div class="flex flex-wrap gap-2 justify-center py-2" id="arrange-pool">
+                <!-- ワードチップがここに入る -->
+            </div>
+
+            <!-- アクションボタン -->
+            <div class="flex space-x-3">
+                <button onclick="clearArrange()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-3 rounded-xl font-bold transition duration-200 text-sm">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> リセット
+                </button>
+                <button onclick="submitArrange()" class="flex-grow bg-sky-500 hover:bg-sky-600 text-white py-3 rounded-xl font-bold transition duration-200 flex items-center justify-center space-x-1 shadow-sm">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>解答を確認する</span>
+                </button>
+            </div>
+
+            <!-- 正誤判定・解説エリア -->
+            <div id="arrange-feedback" class="hidden bg-slate-100 p-4 rounded-xl space-y-2">
+                <div class="flex items-center space-x-2 font-bold" id="arrange-feedback-title">
+                    <!-- アイコンと正誤テキスト -->
+                </div>
+                <p id="arrange-feedback-en" class="text-sm font-semibold text-gray-800"></p>
+                <p id="arrange-feedback-point" class="text-xs text-gray-600 leading-relaxed"></p>
+                <button onclick="nextArrangeQuestion()" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg font-bold transition flex items-center justify-center space-x-1">
+                    <span>次へ進む</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ================= 4. 特訓リザルト画面 ================= -->
+        <div id="screen-result" class="hidden max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6 text-center space-y-6">
+            <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-4xl mx-auto shadow-inner">
+                <i class="fa-solid fa-trophy text-yellow-500 animate-bounce"></i>
+            </div>
+            
+            <div class="space-y-1">
+                <h2 class="text-2xl font-bold text-gray-800">特訓セッション終了！</h2>
+                <p class="text-xs text-gray-400" id="result-mode-lesson-text">Lesson 4 - 暗記カード</p>
+            </div>
+
+            <!-- スコア表示 -->
+            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 max-w-xs mx-auto">
+                <div class="text-xs text-gray-500 font-semibold mb-1">SCORE</div>
+                <div class="text-3xl font-extrabold text-indigo-700" id="result-score-ratio">10 / 10</div>
+                <div class="text-xs text-gray-400 mt-1" id="result-score-evaluation">お見事！カンペキです！</div>
+            </div>
+
+            <!-- 不正解リスト（復習用） -->
+            <div id="review-box" class="hidden text-left space-y-2">
+                <span class="text-xs font-bold text-rose-500 block">要復習問題（試験要注意！）:</span>
+                <div id="review-list" class="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                    <!-- 不正解だった問題がリスト化される -->
+                </div>
+            </div>
+
+            <!-- ボタン -->
+            <div class="space-y-2 pt-2">
+                <button onclick="restartCurrentSession()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition duration-200">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> もう一度特訓する
+                </button>
+                <button onclick="backToDashboard()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold transition duration-200">
+                    ダッシュボードに戻る
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- フッター -->
+    <footer class="bg-gray-800 text-gray-400 py-4 border-t border-gray-700 mt-8 text-center text-xs">
+        <p>&copy; 2026 FINAL DRAFT 試験対策暗記システム / 高校論表Ⅲ準拠</p>
+    </footer>
+
+    <!-- JavaScript 制御 -->
+    <script>
+        // ================= 教材データ定義 =================
+        const lessonsData = {
+            "L4": {
+                title: "Lesson 4: 健康 (1)",
+                description: "不定詞・動名詞を目的語にする動詞",
+                sentences: [
+                    {
+                        ja: "母は健康を維持するために、毎日散歩している。",
+                        en: "My mother walks every day to stay healthy.",
+                        blank: "to stay healthy",
+                        options: ["to stay healthy", "keeping healthy", "staying healthy", "for stay healthy"],
+                        point: "stay healthyで「健康を維持する」。目的を表す不定詞「〜するために」を使用。"
+                    },
+                    {
+                        ja: "コーヒーを飲むことは、健康によいのですか？",
+                        en: "Is drinking coffee good for your health?",
+                        blank: "good for your health",
+                        options: ["good for your health", "healthy for your life", "well to your body", "good for you health"],
+                        point: "be good for ~ で「〜に良い」。health（健康）は名詞形です。"
+                    },
+                    {
+                        ja: "この簡単な運動によって、健康寿命を延ばすことができる。",
+                        en: "This simple exercise can extend healthy life expectancy.",
+                        blank: "extend healthy life expectancy",
+                        options: ["extend healthy life expectancy", "increase physical life time", "improve safe life speed", "longer healthy life style"],
+                        point: "healthy life expectancy / healthy lifespan で「健康寿命」を表します。extendは「〜を延ばす」。"
+                    },
+                    {
+                        ja: "明かりをつけたまま、眠りに落ちてしまった。",
+                        en: "I fell asleep with the lights on.",
+                        blank: "fell asleep",
+                        options: ["fell asleep", "felt sleeping", "fall asleep", "fallen sleepy"],
+                        point: "fall asleepで「眠りに落ちる」。過去形はfell asleep。with the lights onは「明かりをつけたまま」。"
+                    },
+                    {
+                        ja: "妹は昨夜、レポート[作文]を書いて夜更かしをした。",
+                        en: "My sister stayed up late last night writing her essay.",
+                        blank: "stayed up late",
+                        options: ["stayed up late", "stoppped up late", "stayed up lately", "kept up late"],
+                        point: "stay up lateで「夜更かしをする」。後ろにdoing（〜しながら）を伴うことが多いです。"
+                    },
+                    {
+                        ja: "私はしばらく、フライドポテトを食べるのをやめると決心した。",
+                        en: "I decided to stop eating French fries for a while.",
+                        blank: "decided to stop eating",
+                        options: ["decided to stop eating", "decided stopping to eat", "decided stop eating", "decided to stop to eat"],
+                        point: "decideは後ろにto不定詞をとる動詞。stopは「やめる」という意味の時は後ろに動名詞(-ing)をとります。"
+                    },
+                    {
+                        ja: "健康を維持したいなら、野菜と果物をとることは大切だ。",
+                        en: "If you want to stay healthy, eating vegetables and fruits is important.",
+                        blank: "eating vegetables and fruits",
+                        options: ["eating vegetables and fruits", "to eat vegetable and fruit", "eat vegetables and fruits", "eating of vegetables and fruit"],
+                        point: "主語として動名詞「eating〜」を用いています。"
+                    },
+                    {
+                        ja: "多くの日本人は十分な睡眠がとれていないとわかっているが、夜にSNSをチェックするのをやめることができない。",
+                        en: "Many Japanese know they are not getting enough sleep, but they cannot stop checking SNS at night.",
+                        blank: "cannot stop checking",
+                        options: ["cannot stop checking", "cannot quit to check", "can stop to checking", "cannot stop to check"],
+                        point: "stop -ingで「〜するのをやめる」。stop to 不定詞だと「〜するために立ち止まる」になるため誤り。"
+                    },
+                    {
+                        ja: "その医者は、私に健康寿命を延ばすために禁煙するよう推奨した。",
+                        en: "The doctor recommended that I stop smoking to extend my healthy life expectancy.",
+                        blank: "recommended that I stop smoking",
+                        options: ["recommended that I stop smoking", "recommended me to stop smoking", "recommended I to stop smoke", "recommended that I stopped smoke"],
+                        point: "recommend (that) S (should) 原形 の形。「禁煙する」はstop smoking（動名詞）。"
+                    }
+                ]
+            },
+            "L5": {
+                title: "Lesson 5: 健康 (2)",
+                description: "因果関係を表す動詞・表現",
+                sentences: [
+                    {
+                        ja: "適度な[十分な]運動をしていますか？",
+                        en: "Are you getting enough exercise?",
+                        blank: "getting enough exercise",
+                        options: ["getting enough exercise", "making enough exercise", "doing many exercises", "take enough exercise"],
+                        point: "get enough exercise で「十分な/適度な運動をする」を表現します。"
+                    },
+                    {
+                        ja: "バランスのよい食事をとることは、健康を維持するために重要だ。",
+                        en: "Eating a balanced diet is important to stay healthy.",
+                        blank: "Eating a balanced diet",
+                        options: ["Eating a balanced diet", "To eat well balanced food", "Eating balance food", "Having balanced diets"],
+                        point: "balanced diet で「バランスのよい食事」を表します。"
+                    },
+                    {
+                        ja: "この国では、不健康な食習慣は深刻な問題だ。",
+                        en: "An unhealthy diet is a serious problem in this country.",
+                        blank: "An unhealthy diet",
+                        options: ["An unhealthy diet", "Unhealthy eating habits", "Unhealthy food diets", "An unhealthy eat style"],
+                        point: "unhealthy dietで「不健康な食事/食生活」。eating habitsでも表現可能。"
+                    },
+                    {
+                        ja: "食事を抜くことは健康によくない。",
+                        en: "It is not good for your health to skip a meal.",
+                        blank: "to skip a meal",
+                        options: ["to skip a meal", "skipping meal", "to miss a food", "to slip meals"],
+                        point: "skip a meal で「食事を抜く」。仮主語のIt is ~ to不定詞の形。"
+                    },
+                    {
+                        ja: "私はここ数週間で太った。",
+                        en: "I have gained weight over the past few weeks.",
+                        blank: "gained weight",
+                        options: ["gained weight", "put down weight", "increased weight", "lost weight"],
+                        point: "gain weightで「太る（体重が増える）」。痩せるはlose weight。"
+                    },
+                    {
+                        ja: "十分な睡眠をとらないと、早死にしてしまう恐れがある。",
+                        en: "Not getting enough sleep can cause an early death.",
+                        blank: "can cause an early death",
+                        options: ["can cause an early death", "will lead early die", "bring early death", "can cause early to die"],
+                        point: "cause an early deathで「早死にを引き起こす/つながる」。"
+                    },
+                    {
+                        ja: "たばこを吸いすぎると、病気（結果）を発症するかもしれない。",
+                        en: "Smoking too much may result in disease.",
+                        blank: "result in disease",
+                        options: ["result in disease", "result from disease", "cause from disease", "lead inside disease"],
+                        point: "result in [結果] で「[結果]に終わる、をもたらす」。"
+                    },
+                    {
+                        ja: "生活習慣病の主な原因は、運動不足だ。",
+                        en: "Chronic diseases are mainly caused by lack of exercise.",
+                        blank: "are mainly caused by",
+                        options: ["are mainly caused by", "mainly result in", "are mainly reason by", "mainly owe to"],
+                        point: "Chronic diseaseで「生活習慣病」。be caused by ~ で「〜が原因である」の受動態構造。"
+                    },
+                    {
+                        ja: "食習慣の変化によって、彼女は体重が増えた。",
+                        en: "Changes in eating habits caused her to gain weight.",
+                        blank: "caused her to gain weight",
+                        options: ["caused her to gain weight", "made her gaining weight", "led her to lose weight", "contributed her to gain weight"],
+                        point: "cause A to 動詞原形「Aに〜させる」の因果構文。"
+                    }
+                ]
+            },
+            "L6": {
+                title: "Lesson 6: 仕事・雇用",
+                description: "受動態・能動態・働き方に関する語彙",
+                sentences: [
+                    {
+                        ja: "姉は仕事で昇進したそうだ。",
+                        en: "I heard that my sister got a promotion at work.",
+                        blank: "got a promotion",
+                        options: ["got a promotion", "got promoted", "had promoted", "got a pay raise"],
+                        point: "get a promotion (or get promoted) で「昇進する」を表します。"
+                    },
+                    {
+                        ja: "彼女は転職したと教えてくれなかった。",
+                        en: "She did not tell me she changed jobs.",
+                        blank: "changed jobs",
+                        options: ["changed jobs", "got a pay raise", "changed works", "moved jobs"],
+                        point: "change jobs で「転職する」。複数形のsがつく点に注意。"
+                    },
+                    {
+                        ja: "私たちの会社では、従業員が残業することを認めていない。",
+                        en: "Our company does not allow employees to work overtime.",
+                        blank: "employees to work overtime",
+                        options: ["employees to work overtime", "employees working over hours", "employers to work late", "employees working out time"],
+                        point: "allow A to do で「Aが〜するのを許可する」。work overtimeで「残業する」。"
+                    },
+                    {
+                        ja: "彼女の妹はカフェでアルバイトをしている。",
+                        en: "Her sister works part-time at a cafe.",
+                        blank: "works part-time",
+                        options: ["works part-time", "works full-time", "has a side job", "does part-times"],
+                        point: "work part-timeで「アルバイトとして働く/パートで働く」。"
+                    },
+                    {
+                        ja: "会社は従業員の半分を解雇した。",
+                        en: "The company laid off half of its employees.",
+                        blank: "laid off half of its employees",
+                        options: ["laid off half of its employees", "fired half of employers", "lay down half of workers", "got laid off half of employees"],
+                        point: "lay offで「（一時）解雇する」。主語は会社（能動態）。"
+                    },
+                    {
+                        ja: "昇進したいなら、もっと一生懸命働く必要がある。",
+                        en: "If you want to get promoted, you need to work harder.",
+                        blank: "get promoted",
+                        options: ["get promoted", "get a pay raise", "lay off", "promote"],
+                        point: "昇進させられる＝昇進する。受動態の「get promoted」が適しています。"
+                    },
+                    {
+                        ja: "去年、従業員の数は10パーセント増えた。",
+                        en: "Last year, the number of employees increased by ten percent.",
+                        blank: "increased by ten percent",
+                        options: ["increased by ten percent", "decreased for ten percent", "was raised to ten percent", "rose on ten percent"],
+                        point: "差を表す前置詞「by」を使い、by ten percent で「10パーセント分だけ」を表します。"
+                    },
+                    {
+                        ja: "10年前、「ワークライフバランス」という表現は世間に知られていなかった。",
+                        en: "Ten years ago, very few people knew the phrase 'work-life balance'.",
+                        blank: "very few people knew the phrase",
+                        options: ["very few people knew the phrase", "almost no body was known the expression", "no people was popular with phrase", "the phrase was not well known for people"],
+                        point: "日本語の「世間に知られていなかった」を受動態ではなく、very few people を主語にした自然な能動態にするPoint。"
+                    },
+                    {
+                        ja: "このレポートによると、転職する人が急速に増えてきたとわかっている。",
+                        en: "According to this paper, the number of people changing jobs has been increasing rapidly.",
+                        blank: "the number of people changing jobs",
+                        options: ["the number of people changing jobs", "the amount of people changed job", "many people who are changing jobs", "a number of people to change jobs"],
+                        point: "the number of ~ で「〜の数」。後修飾のchanging jobs（現在分詞）がつながっています。"
+                    }
+                ]
+            },
+            "L7": {
+                title: "Lesson 7: 環境問題 (1)",
+                description: "地球温暖化・気候変動・原因の前置詞",
+                sentences: [
+                    {
+                        ja: "我々は環境問題について、もっと考える必要がある。",
+                        en: "We need to think more about environmental problems.",
+                        blank: "environmental problems",
+                        options: ["environmental problems", "environmentalists issue", "natural situations", "friendly ecology problems"],
+                        point: "environmental problems/issues で「環境問題」を指します。"
+                    },
+                    {
+                        ja: "この袋は環境に優しい。",
+                        en: "This bag is environmentally friendly.",
+                        blank: "environmentally friendly",
+                        options: ["environmentally friendly", "environmental gentle", "friendly for environment", "eco-friendly bag"],
+                        point: "environmentally friendly (またはeco-friendly) で「環境に優しい」。副詞+形容詞の構造。"
+                    },
+                    {
+                        ja: "私たちは地球温暖化を止める必要がある。",
+                        en: "We need to stop global warming.",
+                        blank: "global warming",
+                        options: ["global warming", "earth warming", "greenhouse warming", "atmosphere warm up"],
+                        point: "global warming で「地球温暖化」です。"
+                    },
+                    {
+                        ja: "地球温暖化が進んでいるのは本当だと思う。",
+                        en: "I think it is true that the earth is getting warmer and warmer.",
+                        blank: "getting warmer and warmer",
+                        options: ["getting warmer and warmer", "growing warm and warm", "becoming more warm", "heating warmer and hot"],
+                        point: "比較級 + and + 比較級 で「ますます〜になる」。"
+                    },
+                    {
+                        ja: "私たちは2030年までに二酸化炭素の排出量を3%削減するよう努めます。",
+                        en: "We will try to reduce carbon dioxide emissions by three percent by 2030.",
+                        blank: "reduce carbon dioxide emissions",
+                        options: ["reduce carbon dioxide emissions", "decrease carbon toxic pollution", "remove CO2 gas release", "cut down carbons exhaust"],
+                        point: "carbon dioxide emissions「二酸化炭素排出量」。"
+                    },
+                    {
+                        ja: "多くの国にとって、海面の上昇は深刻な問題だ。",
+                        en: "Rising sea levels is a serious problem for a lot of countries.",
+                        blank: "Rising sea levels",
+                        options: ["Rising sea levels", "High wave levels", "Rising ocean deeps", "Increases of sea top"],
+                        point: "rising sea levels で「海面の上昇」。"
+                    },
+                    {
+                        ja: "気候変動の原因は何？",
+                        en: "What is climate change caused by?",
+                        blank: "climate change caused by",
+                        options: ["climate change caused by", "the reason for climate change", "climate changing reasons of", "making of climate changes"],
+                        point: "climate changeで「気候変動」。What is A caused by?「Aの原因は何？」の受動態疑問文。"
+                    },
+                    {
+                        ja: "異常気象が起こる頻度が増えてきている。",
+                        en: "The frequency of abnormal weather has been increasing.",
+                        blank: "The frequency of abnormal weather",
+                        options: ["The frequency of abnormal weather", "The speed of dangerous storm", "How many times strange weather", "Abnormal climate limits"],
+                        point: "frequencyで「頻度」。abnormal (or unusual/extreme) weatherで「異常気象」。"
+                    },
+                    {
+                        ja: "気候変動は、動物の繁殖能力を阻害するかもしれない。",
+                        en: "Climate change may disrupt the ability of animals to reproduce.",
+                        blank: "disrupt the ability of animals to reproduce",
+                        options: ["disrupt the ability of animals to reproduce", "damage the animal can make babies", "stop animals to have children", "disturb animal ability of reproduce"],
+                        point: "disrupt「阻害する」。the ability of A to do で「Aが〜する能力」。"
+                    }
+                ]
+            },
+            "L8": {
+                title: "Lesson 8: 環境問題 (2)",
+                description: "エネルギー・絶滅危惧種・引用表現",
+                sentences: [
+                    {
+                        ja: "この国は天然資源が豊富だ[乏しい]。",
+                        en: "This country is rich in natural resources.",
+                        blank: "rich in natural resources",
+                        options: ["rich in natural resources", "rich of natural resources", "poor with original fuels", "full in normal power"],
+                        point: "be rich in ~ で「〜が豊富である」。natural resourcesで「天然資源」。"
+                    },
+                    {
+                        ja: "化石燃料にはいくつか種類がある。",
+                        en: "There are several types of fossil fuels.",
+                        blank: "fossil fuels",
+                        options: ["fossil fuels", "nature gases", "coal energies", "buried fuels"],
+                        point: "fossil fuels で「化石燃料」を表します。"
+                    },
+                    {
+                        ja: "我々は代替エネルギー源を使うべきだ。",
+                        en: "We should use alternative energy sources.",
+                        blank: "alternative energy sources",
+                        options: ["alternative energy sources", "substitute power systems", "changed fuel resources", "replaced energy limits"],
+                        point: "alternative energy sources で「代替エネルギー源」。"
+                    },
+                    {
+                        ja: "我々は持続可能な[再生可能]エネルギーを使うべきだ。",
+                        en: "We should use sustainable energy.",
+                        blank: "sustainable energy",
+                        options: ["sustainable energy", "re-use power", "kept energy style", "renewable energy sources"],
+                        point: "sustainable energy「持続可能なエネルギー」。または renewable energy「再生可能エネルギー」。"
+                    },
+                    {
+                        ja: "絶滅危惧種のリストがある。",
+                        en: "There is a list of endangered species.",
+                        blank: "endangered species",
+                        options: ["endangered species", "danger animals", "extinct species list", "ending animal types"],
+                        point: "endangered species で「絶滅危惧種」（複数扱い）。"
+                    },
+                    {
+                        ja: "ウミガメは絶滅の危機に瀕している。",
+                        en: "Sea turtles are in danger of extinction.",
+                        blank: "in danger of extinction",
+                        options: ["in danger of extinction", "in dangerous of extinct", "extincting danger now", "dangerously for dying out"],
+                        point: "be in danger of extinction で「絶滅の危機に瀕している」。"
+                    },
+                    {
+                        ja: "ドードーは17世紀に絶滅した。",
+                        en: "The dodo became extinct in the 17th century.",
+                        blank: "became extinct",
+                        options: ["became extinct", "was endangered", "went extinction", "dead out"],
+                        point: "become extinct で「絶滅する」を表します。"
+                    },
+                    {
+                        ja: "生物多様性の損失は危険だ。",
+                        en: "Loss of biodiversity is dangerous.",
+                        blank: "Loss of biodiversity",
+                        options: ["Loss of biodiversity", "Missing of various lives", "Losing of biome systems", "Lost of biology differences"],
+                        point: "biodiversityで「生物多様性」。"
+                    },
+                    {
+                        ja: "人間は多くの動物の生息地の喪失を引き起こしてきた。",
+                        en: "Humans have caused loss of habitat of many animals.",
+                        blank: "loss of habitat",
+                        options: ["loss of habitat", "losing of living places", "loss of animal houses", "destroying habitats"],
+                        point: "habitat で「（動植物の）生息地」。"
+                    }
+                ]
+            }
+        };
+
+        // ================= アプリ全体のステート管理 =================
+        let currentLessonKey = "L4";
+        let currentMode = "card"; // card, fill, arrange
+        let currentQuestionIndex = 0;
+        let activeQuestions = [];
+        let score = 0;
+        let incorrectQuestions = []; // 間違えた問題リスト
+
+        // 進行ステート
+        let hasCheckedAnswer = false;
+        let arrangeUserSelection = []; // 並べ替え用ユーザー選択配列
+
+        // 各モード・レッスンごとの進捗状況をローカルに仮保存（リロードで消えるが今回は1セッションで動作）
+        const progressStats = { L4: 0, L5: 0, L6: 0, L7: 0, L8: 0 };
+
+        // アプリ起動時の初期化
+        window.onload = function() {
+            renderDashboard();
+            updateTotalProgress();
+        };
+
+        // ================= ダッシュボード画面の構築 =================
+        function renderDashboard() {
+            const grid = document.getElementById("lesson-grid");
+            grid.innerHTML = "";
+
+            Object.keys(lessonsData).forEach(key => {
+                const lesson = lessonsData[key];
+                const progress = progressStats[key];
+
+                const card = document.createElement("button");
+                card.className = "bg-white p-5 rounded-xl border border-gray-100 shadow-sm text-left hover:border-indigo-400 hover:shadow-md transition duration-200 flex justify-between items-center w-full";
+                card.onclick = () => openModeSelector(key);
+
+                card.innerHTML = `
+                    <div class="flex-1 pr-4">
+                        <span class="text-xs font-bold text-indigo-600 block mb-1">${key}</span>
+                        <h4 class="font-bold text-gray-800 text-sm md:text-base">${lesson.title}</h4>
+                        <p class="text-xs text-gray-500 mt-1 leading-snug">${lesson.description}</p>
+                        <div class="flex items-center space-x-2 mt-3">
+                            <div class="w-24 bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-indigo-500 h-full" style="width: ${progress}%"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-gray-400">${progress}% 完了</span>
+                        </div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-sm">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 全体の進捗表示更新
+        function updateTotalProgress() {
+            const keys = Object.keys(progressStats);
+            const sum = keys.reduce((acc, k) => acc + progressStats[k], 0);
+            const avg = Math.round(sum / keys.length);
+            
+            document.getElementById("total-progress-bar").style.width = `${avg}%`;
+            document.getElementById("total-progress-percent").textContent = `${avg}%`;
+        }
+
+        // モード選択モーダルのオープン
+        function openModeSelector(lessonKey) {
+            currentLessonKey = lessonKey;
+            const lesson = lessonsData[lessonKey];
+            document.getElementById("selected-lesson-title").textContent = lesson.title;
+            
+            const selector = document.getElementById("mode-selector-container");
+            selector.classList.remove("hidden");
+            selector.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeModeSelector() {
+            document.getElementById("mode-selector-container").classList.add("hidden");
+        }
+
+        // ================= モード起動の分岐 =================
+        function startMode(mode) {
+            currentMode = mode;
+            closeModeSelector();
+            
+            // クイズ用問題群をセット
+            activeQuestions = [...lessonsData[currentLessonKey].sentences];
+            currentQuestionIndex = 0;
+            score = 0;
+            incorrectQuestions = [];
+
+            // 画面の切り替え
+            document.getElementById("screen-dashboard").classList.add("hidden");
+            document.getElementById("screen-card").classList.add("hidden");
+            document.getElementById("screen-fill").classList.add("hidden");
+            document.getElementById("screen-arrange").classList.add("hidden");
+            document.getElementById("screen-result").classList.add("hidden");
+
+            if (mode === 'card') {
+                document.getElementById("screen-card").classList.remove("hidden");
+                loadCardQuestion();
+            } else if (mode === 'fill') {
+                document.getElementById("screen-fill").classList.remove("hidden");
+                loadFillQuestion();
+            } else if (mode === 'arrange') {
+                document.getElementById("screen-arrange").classList.remove("hidden");
+                loadArrangeQuestion();
+            }
+        }
+
+        // ダッシュボードに戻る
+        function backToDashboard() {
+            document.getElementById("screen-dashboard").classList.remove("hidden");
+            document.getElementById("screen-card").classList.add("hidden");
+            document.getElementById("screen-fill").classList.add("hidden");
+            document.getElementById("screen-arrange").classList.add("hidden");
+            document.getElementById("screen-result").classList.add("hidden");
+            renderDashboard();
+            updateTotalProgress();
+        }
+
+        // ================= 1. 暗記カード制御 =================
+        function loadCardQuestion() {
+            const q = activeQuestions[currentQuestionIndex];
+            
+            // カードの表裏を強制的に表（日本語）に戻す
+            const flashcard = document.getElementById("flashcard");
+            flashcard.classList.remove("rotate-y-180");
+
+            // テキスト流し込み
+            document.getElementById("card-ja").textContent = q.ja;
+            document.getElementById("card-en").textContent = q.en;
+            document.getElementById("card-point").textContent = `💡 Point: ${q.point}`;
+
+            // 進行テキスト
+            document.getElementById("card-progress-text").textContent = `${currentQuestionIndex + 1} / ${activeQuestions.length}`;
+            const percentage = ((currentQuestionIndex) / activeQuestions.length) * 100;
+            document.getElementById("card-progress-bar").style.width = `${percentage}%`;
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById("flashcard");
+            flashcard.classList.toggle("rotate-y-180");
+        }
+
+        function markCardMastered(isMastered) {
+            if (isMastered) {
+                score++;
+            } else {
+                // 不正解リストに記録
+                incorrectQuestions.push(activeQuestions[currentQuestionIndex]);
+            }
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < activeQuestions.length) {
+                loadCardQuestion();
+            } else {
+                finishSession();
+            }
+        }
+
+
+        // ================= 2. 穴埋めテスト制御 =================
+        function loadFillQuestion() {
+            hasCheckedAnswer = false;
+            document.getElementById("fill-feedback").classList.add("hidden");
+            
+            const q = activeQuestions[currentQuestionIndex];
+            
+            // 進捗・スコア更新
+            document.getElementById("fill-progress-text").textContent = `${currentQuestionIndex + 1} / ${activeQuestions.length}`;
+            document.getElementById("fill-score-live").textContent = `正解: ${score}`;
+            const percentage = ((currentQuestionIndex) / activeQuestions.length) * 100;
+            document.getElementById("fill-progress-bar").style.width = `${percentage}%`;
+
+            // 問題文セット（太字の穴を[ _____ ]に置換）
+            document.getElementById("fill-question-ja").textContent = q.ja;
+            
+            // 英文から該当箇所を [ _________ ] にする
+            const blankedEn = q.en.replace(q.blank, " [ ＿ ＿ ＿ ＿ ＿ ] ");
+            document.getElementById("fill-question-en").textContent = blankedEn;
+
+            // 選択肢の構築 (シャッフル)
+            const options = shuffleArray([...q.options]);
+            const optionsContainer = document.getElementById("fill-options");
+            optionsContainer.innerHTML = "";
+
+            options.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.className = "w-full text-left bg-white hover:bg-slate-50 border border-gray-200 p-4 rounded-xl font-medium transition duration-150 text-sm md:text-base flex justify-between items-center";
+                btn.onclick = () => checkFillAnswer(btn, opt, q.blank);
+                
+                btn.innerHTML = `
+                    <span>${opt}</span>
+                    <i class="fa-regular fa-circle text-gray-300"></i>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkFillAnswer(selectedBtn, selectedOpt, correctOpt) {
+            if (hasCheckedAnswer) return;
+            hasCheckedAnswer = true;
+
+            const buttons = document.querySelectorAll("#fill-options button");
+            const q = activeQuestions[currentQuestionIndex];
+
+            // すべての選択肢をロック
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                const optText = btn.querySelector("span").textContent;
+                if (optText === correctOpt) {
+                    btn.classList.remove("border-gray-200");
+                    btn.classList.add("bg-emerald-50", "border-emerald-300", "text-emerald-800", "font-bold");
+                    btn.querySelector("i").className = "fa-solid fa-circle-check text-emerald-500";
+                }
+            });
+
+            const isCorrect = selectedOpt === correctOpt;
+            if (isCorrect) {
+                score++;
+                showFillFeedback(true, q);
+            } else {
+                selectedBtn.classList.remove("border-gray-200");
+                selectedBtn.classList.add("bg-rose-50", "border-rose-300", "text-rose-800", "font-bold");
+                selectedBtn.querySelector("i").className = "fa-solid fa-circle-xmark text-rose-500";
+                incorrectQuestions.push(q); // 復習用に保存
+                showFillFeedback(false, q);
+            }
+        }
+
+        function showFillFeedback(isCorrect, q) {
+            const box = document.getElementById("fill-feedback");
+            const title = document.getElementById("fill-feedback-title");
+            const enText = document.getElementById("fill-feedback-en");
+            const point = document.getElementById("fill-feedback-point");
+
+            box.classList.remove("hidden");
+            if (isCorrect) {
+                title.className = "flex items-center space-x-2 text-emerald-600 font-bold";
+                title.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>正解！お見事！</span>`;
+            } else {
+                title.className = "flex items-center space-x-2 text-rose-600 font-bold";
+                title.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> <span>不正解... 試験前に確認！</span>`;
+            }
+
+            enText.textContent = q.en;
+            point.innerHTML = `<strong>💡 解説：</strong>${q.point}`;
+            box.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function nextFillQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < activeQuestions.length) {
+                loadFillQuestion();
+            } else {
+                finishSession();
+            }
+        }
+
+
+        // ================= 3. 並べ替えテスト制御 =================
+        let arrangeCorrectOrder = [];
+
+        function loadArrangeQuestion() {
+            hasCheckedAnswer = false;
+            document.getElementById("arrange-feedback").classList.add("hidden");
+            arrangeUserSelection = [];
+
+            const q = activeQuestions[currentQuestionIndex];
+
+            // 進捗・スコア更新
+            document.getElementById("arrange-progress-text").textContent = `${currentQuestionIndex + 1} / ${activeQuestions.length}`;
+            document.getElementById("arrange-score-live").textContent = `正解: ${score}`;
+            const percentage = ((currentQuestionIndex) / activeQuestions.length) * 100;
+            document.getElementById("arrange-progress-bar").style.width = `${percentage}%`;
+
+            // 問題日本語
+            document.getElementById("arrange-question-ja").textContent = q.ja;
+
+            // ワークベンチ初期化
+            document.getElementById("arrange-workbench").innerHTML = "";
+
+            // 正しい単語群に分割 (ピリオドや疑問符は一時的に除去するか、末尾に結合)
+            const cleanedSentence = q.en.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+            arrangeCorrectOrder = cleanedSentence.split(/\s+/).filter(word => word.length > 0);
+
+            // 単語プール（シャッフル）
+            const poolWords = shuffleArray([...arrangeCorrectOrder]);
+            const poolContainer = document.getElementById("arrange-pool");
+            poolContainer.innerHTML = "";
+
+            poolWords.forEach((word, index) => {
+                const chip = document.createElement("button");
+                chip.className = "bg-white border border-gray-200 text-gray-700 font-semibold px-3 py-2 rounded-lg text-sm shadow-sm hover:bg-indigo-50 hover:border-indigo-300 active:scale-95 transition duration-150";
+                chip.textContent = word;
+                chip.onclick = () => selectWord(chip, word);
+                poolContainer.appendChild(chip);
+            });
+        }
+
+        function selectWord(chipElement, word) {
+            if (hasCheckedAnswer) return;
+
+            // プールから隠して、ワークベンチに移す
+            chipElement.classList.add("hidden");
+            arrangeUserSelection.push({ word, chipElement });
+
+            renderWorkbench();
+        }
+
+        function renderWorkbench() {
+            const bench = document.getElementById("arrange-workbench");
+            bench.innerHTML = "";
+
+            arrangeUserSelection.forEach((item, index) => {
+                const activeChip = document.createElement("button");
+                activeChip.className = "bg-indigo-600 text-white font-semibold px-3 py-2 rounded-lg text-sm shadow-sm hover:bg-indigo-700 transition duration-150 flex items-center space-x-1";
+                activeChip.innerHTML = `
+                    <span>${item.word}</span>
+                    <i class="fa-solid fa-circle-xmark text-indigo-300 text-xs"></i>
+                `;
+                activeChip.onclick = () => deselectWord(index);
+                bench.appendChild(activeChip);
+            });
+        }
+
+        function deselectWord(index) {
+            if (hasCheckedAnswer) return;
+
+            const item = arrangeUserSelection[index];
+            item.chipElement.classList.remove("hidden"); // プールに復活
+            arrangeUserSelection.splice(index, 1); // 選択肢から除外
+
+            renderWorkbench();
+        }
+
+        function clearArrange() {
+            if (hasCheckedAnswer) return;
+            arrangeUserSelection.forEach(item => {
+                item.chipElement.classList.remove("hidden");
+            });
+            arrangeUserSelection = [];
+            renderWorkbench();
+        }
+
+        function submitArrange() {
+            if (hasCheckedAnswer) return;
+            hasCheckedAnswer = true;
+
+            const q = activeQuestions[currentQuestionIndex];
+            const userSentence = arrangeUserSelection.map(item => item.word.toLowerCase()).join(" ");
+            const correctSentence = arrangeCorrectOrder.map(w => w.toLowerCase()).join(" ");
+
+            const isCorrect = userSentence === correctSentence;
+
+            const box = document.getElementById("arrange-feedback");
+            const title = document.getElementById("arrange-feedback-title");
+            const enText = document.getElementById("arrange-feedback-en");
+            const point = document.getElementById("arrange-feedback-point");
+
+            box.classList.remove("hidden");
+
+            if (isCorrect) {
+                score++;
+                title.className = "flex items-center space-x-2 text-emerald-600 font-bold";
+                title.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>並べ替え成功！完璧！</span>`;
+            } else {
+                incorrectQuestions.push(q);
+                title.className = "flex items-center space-x-2 text-rose-600 font-bold";
+                title.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> <span>誤りがあります...</span>`;
+            }
+
+            enText.textContent = q.en;
+            point.innerHTML = `<strong>💡 解説：</strong>${q.point}`;
+            box.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function nextArrangeQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < activeQuestions.length) {
+                loadArrangeQuestion();
+            } else {
+                finishSession();
+            }
+        }
+
+
+        // ================= 4. セッション終了・結果画面 =================
+        function finishSession() {
+            // ダッシュボード等画面を非表示にして結果画面を表示
+            document.getElementById("screen-card").classList.add("hidden");
+            document.getElementById("screen-fill").classList.add("hidden");
+            document.getElementById("screen-arrange").classList.add("hidden");
+            document.getElementById("screen-result").classList.remove("hidden");
+
+            // タイトル文言
+            const lesson = lessonsData[currentLessonKey];
+            let modeName = "暗記カード";
+            if (currentMode === 'fill') modeName = "穴埋めテスト";
+            if (currentMode === 'arrange') modeName = "並べ替えテスト";
+            document.getElementById("result-mode-lesson-text").textContent = `${lesson.title} - ${modeName}`;
+
+            // スコア表示
+            const ratio = `${score} / ${activeQuestions.length}`;
+            document.getElementById("result-score-ratio").textContent = ratio;
+
+            // スコア評価
+            const rate = score / activeQuestions.length;
+            let evaluation = "まだまだ改善の余地あり！教科書を復習しよう。";
+            if (rate === 1) {
+                evaluation = "お見事！本番でもパーフェクトを狙いましょう！✨";
+            } else if (rate >= 0.8) {
+                evaluation = "素晴らしい完成度！間違えた部分だけおさらい！👍";
+            } else if (rate >= 0.5) {
+                evaluation = "あと少し！繰り返し練習して高得点を目指そう！🔥";
+            }
+            document.getElementById("result-score-evaluation").textContent = evaluation;
+
+            // 今回のレッスンの進捗に反映 (最高点を記録)
+            const currentProgress = Math.round(rate * 100);
+            if (currentProgress > progressStats[currentLessonKey]) {
+                progressStats[currentLessonKey] = currentProgress;
+            }
+
+            // 不正解リストの生成
+            const reviewBox = document.getElementById("review-box");
+            const reviewList = document.getElementById("review-list");
+            reviewList.innerHTML = "";
+
+            if (incorrectQuestions.length > 0) {
+                reviewBox.classList.remove("hidden");
+                incorrectQuestions.forEach(q => {
+                    const item = document.createElement("div");
+                    item.className = "p-3 bg-rose-50 border border-rose-100 rounded-lg text-xs space-y-1";
+                    item.innerHTML = `
+                        <div class="font-bold text-gray-800">${q.ja}</div>
+                        <div class="font-semibold text-rose-700 font-mono">${q.en}</div>
+                        <div class="text-[10px] text-gray-400">💡 ${q.point}</div>
+                    `;
+                    reviewList.appendChild(item);
+                });
+            } else {
+                reviewBox.classList.add("hidden");
+            }
+        }
+
+        // セッションの再開
+        function restartCurrentSession() {
+            startMode(currentMode);
+        }
+
+
+        // ================= ユーティリティ関数 =================
+        // フィッシャー–イェーツのシャッフルアルゴリズム
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
+
+```
